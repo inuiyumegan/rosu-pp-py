@@ -32,6 +32,7 @@ mod mods;
 mod performance;
 mod score_state;
 mod strains;
+mod srr;
 
 #[pymodule]
 fn rosu_pp_py(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

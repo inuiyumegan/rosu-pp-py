@@ -1,0 +1,43 @@
+osu file format v14
+
+[General]
+Mode: 3
+
+[Metadata]
+Title: SRR Mania Test
+Artist: test
+Creator: test
+Version: 4K
+Source:
+Tags:
+BeatmapID: 0
+BeatmapSetID: -1
+
+[Difficulty]
+HPDrainRate: 8
+CircleSize: 4
+OverallDifficulty: 8
+ApproachRate: 9
+SliderMultiplier: 1.4
+SliderTickRate: 1
+
+[TimingPoints]
+0,500,4,1,0,100,1,0
+
+[HitObjects]
+64,192,0,1,0,0:0:0:0:
+192,192,100,1,0,0:0:0:0:
+320,192,200,1,0,0:0:0:0:
+448,192,300,1,0,0:0:0:0:
+64,192,400,128,0,700:0:0:0:0:
+192,192,450,1,0,0:0:0:0:
+320,192,500,1,0,0:0:0:0:
+448,192,550,128,0,900:0:0:0:0:
+64,192,600,1,0,0:0:0:0:
+192,192,650,1,0,0:0:0:0:
+320,192,700,1,0,0:0:0:0:
+448,192,750,1,0,0:0:0:0:
+64,192,800,1,0,0:0:0:0:
+192,192,850,1,0,0:0:0:0:
+320,192,900,1,0,0:0:0:0:
+448,192,950,1,0,0:0:0:0:

@@ -1,4 +1,4 @@
-use std::{error::Error as StdError, fmt::Write};
+use std::{error::Error as StdError, fmt::Write, path::PathBuf};
 
 use pyo3::{
     exceptions::PyTypeError,
@@ -20,6 +20,10 @@ use crate::{
 #[pyclass(name = "Beatmap")]
 pub struct PyBeatmap {
     pub(crate) inner: Beatmap,
+    /// The original file path when the beatmap was loaded from disk.
+    /// Used by the Star-Rating-Rebirth mania override which needs to re-read
+    /// the `.osu` file with its own parser.
+    pub(crate) path: Option<PathBuf>,
 }
 
 #[pymethods]
@@ -34,13 +38,15 @@ impl PyBeatmap {
         };
 
         let mut map_res = None;
+        let mut path: Option<PathBuf> = None;
 
         for (key, value) in kwargs {
             extract_args! {
                 match key {
                     "path" => {
-                        let path: &str = extract!(path = value as "str");
-                        map_res = Some(Beatmap::from_path(path));
+                        let p: &str = extract!(path = value as "str");
+                        path = Some(PathBuf::from(p));
+                        map_res = Some(Beatmap::from_path(p));
                     },
                     "content" => {
                         let bytes = if let Ok(content) = value.extract::<&str>() {
@@ -79,7 +85,7 @@ impl PyBeatmap {
             }
         };
 
-        Ok(Self { inner: map })
+        Ok(Self { inner: map, path })
     }
 
     #[pyo3(signature = (mode, mods=None))]

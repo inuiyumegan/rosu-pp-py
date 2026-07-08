@@ -98,6 +98,10 @@ impl PyDifficulty {
     }
 
     fn calculate(&self, map: &PyBeatmap, py: Python<'_>) -> PyResult<PyDifficultyAttributes> {
+        if let Some(mania_attrs) = crate::srr::mania_difficulty_attrs(self, map, py)? {
+            return Ok(mania_attrs.into());
+        }
+
         Ok(self
             .try_as_difficulty(map.inner.mode, py)?
             .calculate(&map.inner)

@@ -7,7 +7,7 @@ use pyo3::{
 use rosu_pp::{
     any::{
         hitresult_generator::{Closest, Composable, Fast},
-        DifficultyAttributes, HitResultPriority,
+        DifficultyAttributes, HitResultPriority, PerformanceAttributes,
     },
     model::mode::GameMode,
     Performance,
@@ -132,8 +132,14 @@ impl PyPerformance {
             Performance::new(DifficultyAttributes::try_from(attrs)?)
         } else if let Ok(map_) = args.extract::<PyRef<'_, PyBeatmap>>() {
             map = map_;
+            let map_ref: &PyBeatmap = &map;
 
-            Performance::new(&map.inner)
+            if let Some(mania_attrs) = crate::srr::mania_difficulty_attrs(&self.difficulty, map_ref, py)?
+            {
+                Performance::new(DifficultyAttributes::Mania(mania_attrs))
+            } else {
+                Performance::new(&map.inner)
+            }
         } else {
             return Err(ArgsError::new_err(
                 "argument must be DifficultyAttributes, PerformanceAttributes, or a Beatmap",
@@ -142,7 +148,28 @@ impl PyPerformance {
 
         perf = self.apply(perf, py)?;
         let state = perf.generate_state();
-        let mut attrs = PyPerformanceAttributes::from(perf.calculate());
+        let rosu_attrs = perf.calculate();
+
+        // Check if this is mania and SRR params are available → use sunny PP formula
+        let mut attrs = match &rosu_attrs {
+            PerformanceAttributes::Mania(_) if crate::srr::get_srr_params().is_some() => {
+                let srr = crate::srr::get_srr_params().unwrap();
+                let sunny_perf = crate::srr::mania_performance(
+                    srr.stars,
+                    state.n_geki,
+                    state.n300,
+                    state.n_katu,
+                    state.n100,
+                    state.n50,
+                    state.misses,
+                    self.difficulty.mods.as_ref(),
+                    GameMode::Mania,
+                    py,
+                )?;
+                PyPerformanceAttributes::from(sunny_perf)
+            }
+            _ => PyPerformanceAttributes::from(rosu_attrs),
+        };
         attrs.state = Some(state.into());
 
         Ok(attrs)
